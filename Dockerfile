@@ -21,12 +21,13 @@ COPY entrypoint.sh /
 #Remove any windows special EOL
 RUN set -x \
  && sed -i -e 's/\r//g' /entrypoint.sh
- 
+RUN chmod +x /entrypoint.sh 
  
 RUN cd /home/gridc \
  && tar xfvz gridc.tar.gz gridc \
  && rm gridc.tar.gz \
  && chown gridc:gridc gridc \
+ && chmod +x gridc \ 
  && mv gridc /bin \
  && mkdir -p .gridc \
  && chmod 777 -R /home/gridc
