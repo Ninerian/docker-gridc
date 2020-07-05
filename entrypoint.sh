@@ -1,34 +1,48 @@
 #!/bin/sh -e
 
 
-if [ "$GRIDC_START_TUNNELS" = "all" ]; then
+if [ -n "$GRIDC_START_CONFIG_TUNNELS" ]; then
 
 	if [ -z "$GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX" ]; then
 	# Set to container ID
 	export GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX=$HOSTNAME
 	fi
-	
-set -x
-exec sh -c ' \
-envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg && \
-gridc -config=/home/gridc/.gridc/gridc.cfg start-all \
-'
+
+
+GRIDC_COMMAND="gridc"
+
+
+# Debug
+if [ -n "$GRIDC_DEBUG" ]; then
+  GRIDC_COMMAND="$GRIDC_COMMAND -log=stdout"
 fi
 
 
-if [ -n "$GRIDC_START_TUNNELS" ]; then
+# Hub connection
+if [ -n "$GRIDC_HUB" ]; then
+  GRIDC_COMMAND="$GRIDC_COMMAND -hub $GRIDC_HUB"
+fi
 
-	if [ -z "$GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX" ]; then
-	# Set to container ID
-	export GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX=$HOSTNAME
-	fi
-	
+
+# Config file
+GRIDC_COMMAND="$GRIDC_COMMAND -config=/home/gridc/.gridc/gridc.cfg"
+
+
+if [ "$GRIDC_START_CONFIG_TUNNELS" = "all" ]; then
+  GRIDC_COMMAND="$GRIDC_COMMAND start-all"
+  else
+  GRIDC_COMMAND="$GRIDC_COMMAND start $GRIDC_START_CONFIG_TUNNELS" 
+fi
+
+export GRIDC_COMMAND
+
 set -x
 exec sh -c ' \
 envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg && \
-gridc -config=/home/gridc/.gridc/gridc.cfg start $GRIDC_START_TUNNELS \
+$GRIDC_COMMAND
 '
 fi
+
 
 
 
