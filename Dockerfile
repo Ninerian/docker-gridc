@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:3.11
 
 RUN set -x && \
     apk add --no-cache -t .deps ca-certificates && \
@@ -11,18 +11,37 @@ RUN set -x && \
     rm glibc-2.29-r0.apk && \
     apk del --purge .deps
     
-RUN apk add --no-cache curl openssl gettext && \
+RUN apk add --no-cache && \
     addgroup -g 6838 -S gridc && \
     adduser -u 6838 -S gridc -G gridc -h /home/gridc
 
-ADD https://www.gridlastic.com/downloads/c2/gridc-1.2-linux_64.tar.gz /home/gridc/gridc.tar.gz
+
+# Bring in gettext so we can get `envsubst`, then throw
+# the rest away. To do this, we need to install `gettext`
+# then move `envsubst` out of the way so `gettext` can
+# be deleted completely, then move `envsubst` back.
+RUN set -x \
+    && tempDir="$(mktemp -d)" \
+    && chown nobody:nobody $tempDir \
+    && apk add --no-cache --virtual .gettext gettext \
+    && mv /usr/bin/envsubst /tmp/ \
+    \
+    && runDeps="$( \
+        scanelf --needed --nobanner /tmp/envsubst \
+            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+            | sort -u \
+            | xargs -r apk info --installed \
+            | sort -u \
+    )" \
+    && apk add --no-cache $runDeps \
+    && apk del .gettext \
+    && mv /tmp/envsubst /usr/local/bin/
+
 
 COPY entrypoint.sh /
-#Remove any windows special EOL
-RUN set -x \
- && sed -i -e 's/\r//g' /entrypoint.sh
 RUN chmod +x /entrypoint.sh 
- 
+
+ADD https://www.gridlastic.com/downloads/c2/gridc-1.2-linux_64.tar.gz /home/gridc/gridc.tar.gz
 RUN cd /home/gridc \
  && tar xfvz gridc.tar.gz gridc \
  && rm gridc.tar.gz \
@@ -30,12 +49,9 @@ RUN cd /home/gridc \
  && chmod +x gridc \ 
  && mv gridc /bin \
  && mkdir -p .gridc \
- && chmod 777 -R /home/gridc
+ && chown gridc:gridc -R /home/gridc
 
 COPY config-template.cfg /home/gridc/
-# Remove any windows special EOL
-RUN set -x \
- && sed -i -e 's/\r//g' /home/gridc/config-template.cfg
 
 
 USER gridc

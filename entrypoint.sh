@@ -1,6 +1,7 @@
 #!/bin/sh -e
 
 
+
 if [ -n "$GRIDC_START_CONFIG_TUNNELS" ]; then
 
 	if [ -z "$GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX" ]; then
@@ -34,13 +35,11 @@ if [ "$GRIDC_START_CONFIG_TUNNELS" = "all" ]; then
   GRIDC_COMMAND="$GRIDC_COMMAND start $GRIDC_START_CONFIG_TUNNELS" 
 fi
 
-export GRIDC_COMMAND
 
 set -x
-exec sh -c ' \
-envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg && \
-$GRIDC_COMMAND
-'
+envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg
+exec $GRIDC_COMMAND
+
 fi
 
 
@@ -93,12 +92,6 @@ else
 fi
 
 
-export GRIDC_COMMAND
-
-
-
 set -x
-exec sh -c ' \
-envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg && \
-$GRIDC_COMMAND
-'
+envsubst < /home/gridc/config-template.cfg > /home/gridc/.gridc/gridc.cfg
+exec $GRIDC_COMMAND

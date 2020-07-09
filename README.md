@@ -4,7 +4,7 @@ Securely connect your private [Gridlastic][gridlastic] selenium grid to your tes
 
 ## Features
 
-  * **Small**: Built using [Alpine][alpine], about 30mb in size.
+  * **Small**: Built using [Alpine][alpine], about 22mb in size.
   * **Simple**: Use environment variables to start encrypted tunnels to your local/remote/docker test environment in seconds.
   * **Secure**: Tunnel endpoints accessible only by your private Gridlastic selenium grid nodes. Runs as non-root user with a random UID `6838` (to avoid mapping to an existing UID).
 
