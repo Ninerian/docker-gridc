@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   test-web-site:
     image: "gridlastic/docker-hello-world"
@@ -7,15 +7,12 @@ services:
 
   gridc-config-tunnels:
     image: gridlastic/docker-gridc
-    ports:
-      - "3000:3000"
     volumes:
       - ./custom-config-template.cfg:/home/gridc/config-template.cfg
     environment:
       GRIDC_ENDPOINT_SUBDOMAIN: ${GRIDC_ENDPOINT_SUBDOMAIN}
       GRIDC_USERNAME: ${GRIDC_USERNAME}
       GRIDC_ACCESS_KEY: ${GRIDC_ACCESS_KEY}
-      GRIDC_HUB: 3000
       GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX: ${GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX}
       GRIDC_START_CONFIG_TUNNELS: all
 
@@ -29,7 +26,7 @@ services:
     image: "gridlastic/docker-hello-world"
  
     
-  gridc-tunnel-1:
+  gridc-tunnel-to-web-site-1:
     image: gridlastic/docker-gridc
     environment:
       GRIDC_ENDPOINT_SUBDOMAIN: ${GRIDC_ENDPOINT_SUBDOMAIN}
@@ -40,7 +37,7 @@ services:
       GRIDC_ADDR_DOMAIN: test-web-site-1
       GRIDC_ADDR_PORT: 80
       
-  gridc-tunnel-2:
+  gridc-tunnel-to-web-site-2:
     image: gridlastic/docker-gridc
     environment:
       GRIDC_ENDPOINT_SUBDOMAIN: ${GRIDC_ENDPOINT_SUBDOMAIN}
