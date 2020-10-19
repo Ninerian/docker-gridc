@@ -37,6 +37,18 @@ Configure your tunnel via environment variables (via `-e`):
   * `GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX` - Use this variable to create unique subdomain endpoints. If empty defaults to `$HOSTNAME` (container ID) when used with `GRIDC_START_CONFIG_TUNNELS`. Tip: start the container(s) from your test runner with your own unique subdomain prefix that you can use in your selenium tests.
 
 
+## Start an additional gridc/tunnel container linking to the docker-hello-world container above, accessing the site on internal container port 80
+
+
+If you have an web service running in a container named `test-gridc-site` listening on internal container port 80:
+
+    $ docker run --rm -it --link test-gridc-site --name running-gridc-linked-to-test-site -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_PROTOCOL=https -e GRIDC_SUBDOMAIN=container-hello-world -e GRIDC_ADDR_DOMAIN=test-gridc-site -e GRIDC_ADDR_PORT=80 gridlastic/docker-gridc
+
+In your selenium code you access the tunnel like:
+
+
+    $ driver().get("https://container-hello-world.<GRIDC_ENDPOINT_SUBDOMAIN>.gridlastic.com:8091");
+
 
 ## Use a custom gridc configuration file
 
@@ -64,11 +76,10 @@ Note that the line `server_addr: ${GRIDC_ENDPOINT_SUBDOMAIN}.gridlastic.com:443`
 
 
 
+## Start TCP tunnel to a local https site
 
-## Start TCP tunnel to https site
 
-
-    $ docker run --rm -it -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_PROTOCOL=tcp -e GRIDC_ADDR_DOMAIN=github.com -e GRIDC_ADDR_PORT=443 gridlastic/docker-gridc
+    $ docker run --rm -it -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_PROTOCOL=tcp -e GRIDC_ADDR_DOMAIN=host.docker.internal -e GRIDC_ADDR_PORT=443 gridlastic/docker-gridc
 
 TCP endpoints do not have subdomains but are issued a random port between `9000-9999` by the server. To tunnel to the test site use this in your selenium test code:
 
@@ -81,24 +92,19 @@ tunnels:
   my_https_site:
     remote_port: 9xxx
     proto:
-      tcp: github.com:443
+      tcp: host.docker.internal:443
 ```
 Also, when mapping to a https site serving valid or self signed ssl, the domain names do not match so the browser displays a certificate error message which can be resolved by adding flags to your selenium code like for Chrome:
 
     $ options.addArguments("ignore-certificate-errors");
 
-Keep in mind that unlike subdomains which have unlimited unique endpoint capability, tcp ports are limited and must also be coordinated to avoid tunnel conflicts if they are specifically requested in the config file. Leave `remote_port:` empty in the config file for randomly assigned. Read more about [Gridlastic Connect tcp tunneling][gridlastic-connect-tcp].
+Note that this method is for internal direct IP https sites with no redirects etc. To test production/other remote sites see [Github repo docker-gridc-squid][docker-gridc-squid]. Keep in mind that unlike subdomains which have unlimited unique endpoint capability, tcp ports are limited and must also be coordinated to avoid tunnel conflicts if they are specifically requested in the config file. Leave `remote_port:` empty in the config file for randomly assigned. Read more about [Gridlastic Connect tcp tunneling][gridlastic-connect-tcp].
 
- 
-## Test a https site using nginx and subdomains (no TCP tunneling required)
-
-See [Github repo docker-gridc-nginx][docker-gridc-nginx]
-
-
-## Test a https site using a standard forwarding proxy like Squid
+## Test a remote https site using a standard forwarding proxy like Squid
 
 See [Github repo docker-gridc-squid][docker-gridc-squid]
 
+ 
 
 ## Create multiple tunnels in docker compose (see [Github repo docker-gridc][docker-gridc] for docker-compose.yml and custom-config-template.cfg)
 
@@ -165,11 +171,18 @@ export GRIDC_ACCESS_KEY=<your Gridlastic grid access_key>
 export GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX=x-y-z
 
 
-Windows
+Windows (CMD)
 set GRIDC_ENDPOINT_SUBDOMAIN=<your Gridlastic Connect subdomain>
 set GRIDC_USERNAME=<your Gridlastic grid username>
 set GRIDC_ACCESS_KEY=<your Gridlastic grid access_key>
 set GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX=x-y-z
+
+
+Windows (Powershell)
+$Env:GRIDC_ENDPOINT_SUBDOMAIN = "<your Gridlastic Connect subdomain>"
+$Env:GRIDC_USERNAME = "<your Gridlastic grid username>"
+$Env:GRIDC_ACCESS_KEY = "<your Gridlastic grid access_key>"
+$Env:GRIDC_CONFIG_SUBDOMAIN_UUID_PREFIX = "x-y-z"
 ```
 
 
@@ -207,6 +220,7 @@ Read more about gridc commands available for [Gridlastic Connect][gridlastic-con
     $ docker run --rm -it -p 4444:4444 -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_HUB=4444 gridlastic/docker-gridc
 
 Hub API access endpoint in your selenium code becomes `http://<USERNAME:ACCESS_KEY>@localhost:4444/wd/hub` or access the grid console like `http://localhost:4444/grid/console`. 
+
 
 
 ## Feedback
