@@ -4,7 +4,7 @@ Securely connect your private [Gridlastic][gridlastic] selenium grid to your tes
 
 ## Features
 
-  * **Small**: Built using [Alpine][alpine], about 22mb in size.
+  * **Small**: Built using [Alpine][alpine], about 20mb in size.
   * **Simple**: Use environment variables to start encrypted tunnels to your local/remote/docker test environment in seconds.
   * **Secure**: Tunnel endpoints accessible only by your private Gridlastic selenium grid nodes. Runs as non-root user with a random UID `6838` (to avoid mapping to an existing UID).
 
@@ -94,9 +94,17 @@ tunnels:
     proto:
       tcp: host.docker.internal:443
 ```
-Also, when mapping to a https site serving valid or self signed ssl, the domain names do not match so the browser displays a certificate error message which can be resolved by adding flags to your selenium code like for Chrome:
+Also, when mapping to a https site serving valid or self signed ssl, the domain names do not match so the browser displays a certificate error message which can be resolved by adding flags to your selenium code like for 
+
+Chrome (options):
 
     $ options.addArguments("ignore-certificate-errors");
+
+
+Firefox (profile):
+
+    $ profile.setAcceptUntrustedCertificates(true);
+
 
 Note that this method is for internal direct IP https sites with no redirects etc. To test production/other remote sites see [Github repo docker-gridc-squid][docker-gridc-squid]. Keep in mind that unlike subdomains which have unlimited unique endpoint capability, tcp ports are limited and must also be coordinated to avoid tunnel conflicts if they are specifically requested in the config file. Leave `remote_port:` empty in the config file for randomly assigned. Read more about [Gridlastic Connect tcp tunneling][gridlastic-connect-tcp].
 
@@ -204,11 +212,11 @@ Will create 3 web site containers and 3 gridc containers with 3 tunnel endpoints
 
 ## Start an empty gridc (no tunnels defined in config file) 
 
-        $ docker run --rm -it --name gridc-no-initial-tunnels -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_START_CONFIG_TUNNELS=all gridlastic/docker-gridc
+    $ docker run --rm -it --name gridc-no-initial-tunnels -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_START_CONFIG_TUNNELS=all gridlastic/docker-gridc
     
 and then in a test runner start tunnels on the fly using unique subdomains that are also used in the tests, like
 
-		$ docker exec -it gridc-no-initial-tunnels gridc -proto https -subdomain=another-tunnel-to-hostmachine-port-8001 host.docker.internal:8001
+    $ docker exec -it gridc-no-initial-tunnels gridc -proto https -subdomain=another-tunnel-to-hostmachine-port-8001 host.docker.internal:8001
 
     
 Read more about gridc commands available for [Gridlastic Connect][gridlastic-connect].
@@ -234,5 +242,4 @@ Report issues/questions/feature requests at `support@gridlastic.com`.
 [gridlastic-connect-tcp]:	https://www.gridlastic.com/gridlastic-connect.html#tcp
 [alpine]:				https://registry.hub.docker.com/_/alpine
 [docker-gridc]:   		https://github.com/gridlastic/docker-gridc
-[docker-gridc-nginx]:   https://github.com/gridlastic/docker-gridc-nginx
 [docker-gridc-squid]:   https://github.com/gridlastic/docker-gridc-squid
