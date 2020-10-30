@@ -10,9 +10,9 @@ Securely connect your private [Gridlastic][gridlastic] selenium grid to your tes
 
 ## Quick demo start for Docker Desktop MAC/Windows
 
-    $ docker run --rm -it -p 3000:3000 --name running-gridc -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_HUB=3000 -e GRIDC_PROTOCOL=https -e GRIDC_SUBDOMAIN=hostmachine-hello-world -e GRIDC_ADDR_DOMAIN=host.docker.internal -e GRIDC_ADDR_PORT=8001 gridlastic/docker-gridc
+    $ docker run --rm -it --name running-gridc -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_PROTOCOL=https -e GRIDC_SUBDOMAIN=hostmachine-hello-world -e GRIDC_ADDR_DOMAIN=host.docker.internal -e GRIDC_ADDR_PORT=8001 gridlastic/docker-gridc
 
-Gridlastic credentials `GRIDC_ENDPOINT_SUBDOMAIN`, `GRIDC_USERNAME` and `GRIDC_ACCESS_KEY` available after launch of selenium grid. On the host machine, creates a Hub API access endpoint to use in your selenium code like (if test runner on host machine) `http://<USERNAME:ACCESS_KEY>@localhost:3000/wd/hub`. Also starts a tunnel to a site (existing or not) on `localhost:8001`. If you have a site active on `localhost:8001` you can run tests to it or start a site on port `8001` like
+Gridlastic credentials `GRIDC_ENDPOINT_SUBDOMAIN`, `GRIDC_USERNAME` and `GRIDC_ACCESS_KEY` available after launch of selenium grid. On the host machine, creates a tunnel to a site (existing or not) on `localhost:8001`. If you have a site active on `localhost:8001` you can run tests to it or start a site on port `8001` like
 
     $ docker run --rm -p 8001:80 --detach --name test-gridc-site gridlastic/docker-hello-world
 
@@ -225,7 +225,7 @@ Read more about gridc commands available for [Gridlastic Connect][gridlastic-con
 ## Start the selenium grid hub endpoint in its own container
 
 
-    $ docker run --rm -it -p 4444:4444 -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_HUB=4444 gridlastic/docker-gridc
+    $ docker run --rm -it -p 4444:4444 --name gridc-hub-endpoint -e GRIDC_ENDPOINT_SUBDOMAIN= -e GRIDC_USERNAME= -e GRIDC_ACCESS_KEY= -e GRIDC_HUB=4444 gridlastic/docker-gridc
 
 Hub API access endpoint in your selenium code becomes `http://<USERNAME:ACCESS_KEY>@localhost:4444/wd/hub` or access the grid console like `http://localhost:4444/grid/console`. 
 
