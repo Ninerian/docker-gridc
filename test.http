@@ -1,0 +1,7 @@
+POST http://localhost:8001/user/create
+Content-Type: application/json
+
+{ "foo": "bar" }
+
+###
+GET http://localhost:8001/
